@@ -1,9 +1,5 @@
 """
 app.py — Mail Reply Assistant
-Streamlit + SQLite. Fetches recent emails over IMAP, suggests a reply using
-a rule-based intent engine, lets you edit it, then sends it over SMTP.
-
-Run with:  streamlit run app.py
 """
 import streamlit as st
 
