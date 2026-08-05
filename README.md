@@ -4,19 +4,24 @@ Python + SQLite + Streamlit app that checks your inbox over IMAP, detects
 the intent of each email using a rule-based keyword engine, drafts a reply
 from a matching template, lets you edit it, and sends it over SMTP.
 
+Everything happens on one screen: enter your email + app password, click
+Connect, and your inbox appears right below.
+
 ## Setup
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env
-```
-
-Then edit `.env` with your real email and app password (see **Gmail App
-Password** below), and run:
-
-```bash
 streamlit run app.py
 ```
+
+That's it — no `.env` file required. Enter your Gmail address and App
+Password directly in the app when it opens (see **Gmail App Password**
+below if you don't have one). They're kept only in your browser session —
+never written to the database or to disk.
+
+*(Optional, for local development only: copy `.env.example` to `.env` and
+fill in your details if you'd like the login form to pre-fill automatically
+each time you run the app.)*
 
 ### Gmail App Password
 Gmail blocks your normal account password for this kind of access. You need
@@ -24,32 +29,34 @@ a 16-character **App Password** instead:
 1. Google Account → **Security**
 2. Turn on **2-Step Verification** (required for App Passwords)
 3. Search **"App Passwords"** in account settings, create one
-4. Paste the 16-character code into `.env` as `EMAIL_PASSWORD`
+4. Paste the 16-character code into the app's password field
 
-Other providers (Outlook, Yahoo, etc.) — just change `IMAP_SERVER` /
-`SMTP_SERVER` in `.env`; see in-app **Setup & Help** page for values.
+Other providers (Outlook, Yahoo, etc.) — expand **"Advanced"** in the app
+to change the IMAP/SMTP server addresses.
 
 ## Project structure
 
 | File | Responsibility |
 |---|---|
-| `app.py` | Streamlit UI — Inbox page (fetch, review, edit, send) and Setup & Help page |
-| `config.py` | Loads credentials from `.env` (never hardcoded, never committed) |
-| `db.py` | SQLite schema + CRUD for the `emails` table (dedup by `message_id`) |
+| `app.py` | Single-page Streamlit UI — connect form + inbox (fetch, review, edit, send) |
+| `config.py` | Optional `.env` defaults, used only to pre-fill the login form locally |
+| `db.py` | SQLite schema + CRUD for the `emails` table; every row is scoped to an `account_email` so different accounts never mix results, and dedup is per-account by `message_id` |
 | `mail_fetcher.py` | IMAP connection; parses sender/subject/body from raw email bytes, handles multipart and encoded headers |
 | `reply_suggester.py` | Rule-based intent detection (keyword matching) + reply templates |
 | `mail_sender.py` | SMTP sending, threads the reply via `In-Reply-To`/`References` headers |
 
 ## How it works
 
-1. Click **Check for New Mail** — connects over IMAP, fetches recent
+1. Enter your email and app password in the **Connect your email** box,
+   click **Connect**
+2. Click **Check for New Mail** — connects over IMAP, fetches recent
    (unread by default) emails
-2. Each email's subject+body is scanned against keyword lists per intent
+3. Each email's subject+body is scanned against keyword lists per intent
    (Meeting Request, Job/Application, Invoice/Payment, Complaint/Issue,
    Thank You, Question/Inquiry, Promotional/Unsubscribe, or General)
-3. A matching template is filled in with the sender's first name and shown
+4. A matching template is filled in with the sender's first name and shown
    as an editable draft
-4. Edit as needed, then **Send Reply** — sends over SMTP and marks the
+5. Edit as needed, then **Send Reply** — sends over SMTP and marks the
    email as `replied` in the database (or **Skip** to mark it handled
    without sending)
 
@@ -64,8 +71,13 @@ Other providers (Outlook, Yahoo, etc.) — just change `IMAP_SERVER` /
 
 ## Security notes
 
-- Credentials live only in `.env` (git-ignored) — never typed into the UI,
-  never stored in the database.
-- This is a **single-user, local tool**: the SQLite file has no
-  authentication layer. Don't deploy this publicly with real inbox access
-  without adding auth first.
+- Credentials are held only in Streamlit's `session_state` for the current
+  browser tab — never written to the database, never logged, cleared when
+  you close or refresh the tab.
+- If you deploy this publicly (e.g. Streamlit Community Cloud), anyone with
+  the link can type in *their own* credentials and use it as a mini mail
+  client — your own credentials are never exposed, but there's no login
+  wall stopping others from using the tool itself. Fine for a demo/resume
+  project; add real authentication before using it for anything sensitive.
+- The database scopes stored emails by `account_email`, so multiple people
+  using the same deployed app won't see each other's inbox contents.

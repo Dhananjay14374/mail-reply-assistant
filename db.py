@@ -1,6 +1,7 @@
 """
 db.py — SQLite data layer for the Mail Reply Assistant.
-Stores fetched emails, their detected intent, and the suggested/edited reply.
+Stores fetched emails, their detected intent, and the suggested/edited reply,
+scoped per connected account_email so different accounts never mix results.
 """
 import sqlite3
 
@@ -18,7 +19,8 @@ def init_db():
     conn.execute("""
         CREATE TABLE IF NOT EXISTS emails (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            message_id TEXT UNIQUE,
+            account_email TEXT,
+            message_id TEXT,
             sender_name TEXT,
             sender_email TEXT,
             subject TEXT,
@@ -27,36 +29,48 @@ def init_db():
             intent TEXT,
             suggested_reply TEXT,
             status TEXT DEFAULT 'pending',   -- pending | replied | skipped
-            fetched_at TEXT DEFAULT (datetime('now'))
+            fetched_at TEXT DEFAULT (datetime('now')),
+            UNIQUE(account_email, message_id)
         )
     """)
+    # Lightweight migration for databases created before account_email existed.
+    try:
+        conn.execute("ALTER TABLE emails ADD COLUMN account_email TEXT")
+    except sqlite3.OperationalError:
+        pass  # column already exists
     conn.commit()
     conn.close()
 
 
-def save_email(message_id, sender_name, sender_email, subject, body,
+def save_email(account_email, message_id, sender_name, sender_email, subject, body,
                 received_date, intent, suggested_reply):
-    """Insert a new email. Ignored silently if message_id already exists (dedup)."""
+    """Insert a new email. Ignored silently if (account_email, message_id) already
+    exists — keeps re-checking mail from creating duplicates."""
     conn = get_connection()
     conn.execute("""
         INSERT OR IGNORE INTO emails
-            (message_id, sender_name, sender_email, subject, body,
+            (account_email, message_id, sender_name, sender_email, subject, body,
              received_date, intent, suggested_reply)
-        VALUES (?,?,?,?,?,?,?,?)
-    """, (message_id, sender_name, sender_email, subject, body,
+        VALUES (?,?,?,?,?,?,?,?,?)
+    """, (account_email, message_id, sender_name, sender_email, subject, body,
           received_date, intent, suggested_reply))
     conn.commit()
     conn.close()
 
 
-def get_emails(status=None):
+def get_emails(account_email, status=None):
+    """Return emails belonging only to the given account_email."""
     conn = get_connection()
     if status:
         rows = conn.execute(
-            "SELECT * FROM emails WHERE status=? ORDER BY id DESC", (status,)
+            "SELECT * FROM emails WHERE account_email=? AND status=? ORDER BY id DESC",
+            (account_email, status),
         ).fetchall()
     else:
-        rows = conn.execute("SELECT * FROM emails ORDER BY id DESC").fetchall()
+        rows = conn.execute(
+            "SELECT * FROM emails WHERE account_email=? ORDER BY id DESC",
+            (account_email,),
+        ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
 

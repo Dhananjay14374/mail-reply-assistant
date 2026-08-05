@@ -9,9 +9,16 @@ from email.utils import parseaddr
 import config
 
 
-def connect():
-    imap = imaplib.IMAP4_SSL(config.IMAP_SERVER)
-    imap.login(config.EMAIL_ADDRESS, config.EMAIL_PASSWORD)
+def connect(email_address=None, email_password=None, imap_server=None):
+    """Connect using explicitly-passed credentials, falling back to .env
+    values (config.py) only if none are given — lets the UI supply its own
+    per-session credentials without needing a .env file at all."""
+    email_address = email_address or config.EMAIL_ADDRESS
+    email_password = email_password or config.EMAIL_PASSWORD
+    imap_server = imap_server or config.IMAP_SERVER
+
+    imap = imaplib.IMAP4_SSL(imap_server)
+    imap.login(email_address, email_password)
     return imap
 
 
@@ -47,9 +54,10 @@ def _get_body(msg) -> str:
         return ""
 
 
-def fetch_recent_emails(limit=10, unseen_only=True):
+def fetch_recent_emails(limit=10, unseen_only=True,
+                         email_address=None, email_password=None, imap_server=None):
     """Return a list of dicts for the most recent emails in INBOX."""
-    imap = connect()
+    imap = connect(email_address, email_password, imap_server)
     imap.select("INBOX")
 
     criteria = "UNSEEN" if unseen_only else "ALL"
