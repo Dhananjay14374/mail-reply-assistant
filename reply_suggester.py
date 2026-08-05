@@ -40,39 +40,39 @@ REPLY_TEMPLATES = {
         "Hi {name},\n\n"
         "Thanks for reaching out. I'd be happy to meet — could you share a "
         "couple of times that work for you, or send over a calendar invite?\n\n"
-        "Best,\n[Your Name]"
+        "Best,\nDhananjay"
     ),
     "Job/Application": (
         "Hi {name},\n\n"
         "Thank you for reaching out regarding this opportunity. I've reviewed "
         "the details and I'm interested in learning more. Could we set up a "
         "time to discuss further?\n\n"
-        "Best regards,\n[Your Name]"
+        "Best regards,\n[Dhananjay]"
     ),
     "Invoice/Payment": (
         "Hi {name},\n\n"
         "Thanks for sending this over. I'll review the invoice and confirm "
         "payment shortly. Please let me know if there's a specific deadline.\n\n"
-        "Best,\n[Your Name]"
+        "Best,\nDhananjay"
     ),
     "Complaint/Issue": (
         "Hi {name},\n\n"
         "I'm sorry to hear you're running into this issue. Could you share a "
         "few more details (screenshots, when it started, etc.) so I can look "
         "into it right away?\n\n"
-        "Best,\n[Your Name]"
+        "Best,\nDhananjay"
     ),
     "Thank You": (
         "Hi {name},\n\n"
         "You're very welcome — glad it was helpful! Let me know if there's "
         "anything else you need.\n\n"
-        "Best,\n[Your Name]"
+        "Best,\nDhananjay"
     ),
     "Question/Inquiry": (
         "Hi {name},\n\n"
         "Thanks for your question. Let me look into this and get back to you "
         "with a full answer shortly.\n\n"
-        "Best,\n[Your Name]"
+        "Best,\nDhananjay"
     ),
     "Promotional/Unsubscribe": (
         "This looks like a promotional email — no reply drafted. "
@@ -81,7 +81,7 @@ REPLY_TEMPLATES = {
     "General": (
         "Hi {name},\n\n"
         "Thanks for your email. I'll take a look and get back to you soon.\n\n"
-        "Best,\n[Your Name]"
+        "Best,\nDhananjay"
     ),
 }
 
