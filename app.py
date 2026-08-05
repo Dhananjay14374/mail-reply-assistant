@@ -9,7 +9,7 @@ import mail_fetcher
 import mail_sender
 import reply_suggester
 
-st.set_page_config(page_title="Mail Reply Assistant", page_icon="📬", layout="wide")
+st.set_page_config(page_title="Mail Reply Assistant",layout="wide")
 db.init_db()
 
 st.title("📬 Mail Reply Assistant")
