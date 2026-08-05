@@ -43,7 +43,7 @@ with st.container(border=True):
             placeholder="16-character app password",
         )
 
-    with st.expander("⚙️ Advanced (other providers, or a non-default port)"):
+    with st.expander("⚙️"):
         a1, a2, a3 = st.columns(3)
         with a1:
             imap_input = st.text_input("IMAP server", value=st.session_state.imap_server)
