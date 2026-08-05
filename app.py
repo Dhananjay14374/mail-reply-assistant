@@ -12,7 +12,7 @@ import reply_suggester
 st.set_page_config(page_title="Mail Reply Assistant",layout="wide")
 db.init_db()
 
-st.title("📬 Mail Reply Assistant")
+st.title("Mail Reply Assistant")
 
 # ---------------------------------------------------------- session state
 defaults = {
