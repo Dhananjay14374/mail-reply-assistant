@@ -1,16 +1,6 @@
 """
 reply_suggester.py — Rule-based intent detection and reply-template engine.
 
-This is a transparent keyword system (like categorizer.py in the expense
-tracker project), not a machine-learning model: each email's subject+body is
-scanned for keyword patterns per intent, and a matching template is filled
-in and returned. It's deterministic, free, and easy to extend — add a
-keyword or a new intent block and it's picked up automatically.
-
-To upgrade this to real AI later: replace suggest_reply()'s body with a
-call to an LLM API (e.g. the Anthropic or OpenAI SDK), passing the email
-text and asking for a drafted reply. Everything else (storage, UI, sending)
-stays the same.
 """
 
 INTENT_KEYWORDS = {
