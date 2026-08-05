@@ -1,14 +1,5 @@
 """
 app.py — Mail Reply Assistant (single-page version)
-Streamlit + SQLite. Enter your email + app password right in the UI, check
-your inbox, review a rule-based suggested reply, edit it, and send.
-
-Run with:  streamlit run app.py
-
-Credentials you type in are kept only in this browser session (Streamlit's
-session_state) — they are never written to the database or to disk. If a
-.env file is present (see config.py), its values pre-fill the form as a
-convenience for local development, but nothing requires it.
 """
 import streamlit as st
 
@@ -181,5 +172,4 @@ else:
                         db.mark_status(e["id"], "skipped")
                         st.rerun()
 
-st.sidebar.caption("Built with Python, SQLite & Streamlit")
 st.sidebar.caption("🔒 Your password is kept only in this browser session — never saved to disk.")
