@@ -43,17 +43,7 @@ with st.container(border=True):
             placeholder="16-character app password",
         )
 
-    with st.expander("⚙️ Advanced (other providers, or a non-default port)"):
-        a1, a2, a3 = st.columns(3)
-        with a1:
-            imap_input = st.text_input("IMAP server", value=st.session_state.imap_server)
-        with a2:
-            smtp_input = st.text_input("SMTP server", value=st.session_state.smtp_server)
-        with a3:
-            smtp_port_input = st.number_input(
-                "SMTP port", value=st.session_state.smtp_port, step=1
-            )
-
+   
     with st.expander("❓ Need a Gmail App Password?"):
         st.markdown("""
 Gmail blocks your normal password for this kind of access — you need a
