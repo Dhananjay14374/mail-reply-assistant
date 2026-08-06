@@ -83,9 +83,6 @@ Gmail blocks your normal password for this kind of access — you need a
 4. Create one, copy the 16-character code
 5. Paste it above — not your normal Gmail password
 
-Other providers: Outlook uses `outlook.office365.com` (IMAP) /
-`smtp.office365.com` (SMTP); Yahoo uses `imap.mail.yahoo.com` /
-`smtp.mail.yahoo.com` — change these under "Advanced" above.
 """)
 
     if st.button("🔌 Connect", type="primary"):
