@@ -171,5 +171,5 @@ else:
                         db.update_reply_text(e["id"], reply_text)
                         db.mark_status(e["id"], "skipped")
                         st.rerun()
-
+st.sidebar.caption(" Created By Dhananjay Kumar.")
 st.sidebar.caption("🔒 Your password is kept only in this browser session — never saved to disk.")
