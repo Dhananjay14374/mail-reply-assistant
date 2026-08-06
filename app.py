@@ -1,14 +1,5 @@
 """
 app.py — Mail Reply Assistant (single-page version)
-Streamlit + SQLite. Enter your email + app password right in the UI, check
-your inbox, review a rule-based suggested reply, edit it, and send.
-
-Run with:  streamlit run app.py
-
-Credentials you type in are kept only in this browser session (Streamlit's
-session_state) — they are never written to the database or to disk. If a
-.env file is present (see config.py), its values pre-fill the form as a
-convenience for local development, but nothing requires it.
 """
 import streamlit as st
 
@@ -54,7 +45,7 @@ with st.container(border=True):
             placeholder="16-character app password",
         )
 
-    with st.expander("⚙️ Advanced (other providers, or a non-default port)"):
+    with st.expander("⚙️"):
         a1, a2, a3 = st.columns(3)
         with a1:
             imap_input = st.text_input("IMAP server", value=st.session_state.imap_server)
@@ -65,7 +56,7 @@ with st.container(border=True):
                 "SMTP port", value=st.session_state.smtp_port, step=1
             )
 
-    with st.expander("🤖 AI-generated replies (optional)"):
+    with st.expander("AI-generated replies (optional)"):
         st.caption(
             "Leave this blank to keep using the built-in rule-based templates — everything "
             "still works without it. Add a free Google Gemini API key to have replies drafted "
@@ -226,5 +217,5 @@ else:
                             except ai_reply.AIReplyError as exc:
                                 st.error(f"AI generation failed: {exc}")
 
-st.sidebar.caption("Built with Python, SQLite & Streamlit")
+st.sidebar.caption(" Created By Dhanankay Kumar")
 st.sidebar.caption("🔒 Your password is kept only in this browser session — never saved to disk.")
