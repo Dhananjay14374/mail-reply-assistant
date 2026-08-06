@@ -1,7 +1,5 @@
 """
 db.py — SQLite data layer for the Mail Reply Assistant.
-Stores fetched emails, their detected intent, and the suggested/edited reply,
-scoped per connected account_email so different accounts never mix results.
 """
 import sqlite3
 
