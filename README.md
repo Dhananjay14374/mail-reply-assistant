@@ -1,11 +1,30 @@
 # 📬 Mail Reply Assistant
 
-Python + SQLite + Streamlit app that checks your inbox over IMAP, detects
-the intent of each email using a rule-based keyword engine, drafts a reply
-from a matching template, lets you edit it, and sends it over SMTP.
+Python + SQLite + Streamlit app that checks your inbox over IMAP, drafts a
+reply for each email — either from rule-based templates or, optionally, a
+free Google Gemini API key — lets you edit it, and sends it over SMTP.
 
 Everything happens on one screen: enter your email + app password, click
 Connect, and your inbox appears right below.
+
+## Optional: AI-generated replies
+
+By default, replies come from the rule-based template engine in
+`reply_suggester.py` (free, no setup, fully offline). If you'd rather have
+replies drafted by an actual language model:
+
+1. Get a free API key (no credit card) at
+   [aistudio.google.com/apikey](https://aistudio.google.com/apikey)
+2. Paste it into the **"🤖 AI-generated replies"** section on the Connect
+   card, then click Connect
+3. New emails you fetch from then on will be drafted by Gemini instead of
+   a template; use **"🤖 Regenerate with AI"** on any existing email to
+   redraft it
+
+Leave the field blank and nothing changes — the app works exactly as
+before. Every draft, AI or template, still shows in an editable box for
+you to review before **Send Reply** — this app never sends anything
+without you clicking Send yourself.
 
 ## Setup
 

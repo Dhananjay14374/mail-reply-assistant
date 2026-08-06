@@ -12,6 +12,7 @@ convenience for local development, but nothing requires it.
 """
 import streamlit as st
 
+import ai_reply
 import config
 import db
 import mail_fetcher
@@ -30,6 +31,7 @@ defaults = {
     "imap_server": config.IMAP_SERVER,
     "smtp_server": config.SMTP_SERVER,
     "smtp_port": config.SMTP_PORT,
+    "gemini_api_key": "",
 }
 for key, val in defaults.items():
     st.session_state.setdefault(key, val)
@@ -63,6 +65,23 @@ with st.container(border=True):
                 "SMTP port", value=st.session_state.smtp_port, step=1
             )
 
+    with st.expander("🤖 AI-generated replies (optional)"):
+        st.caption(
+            "Leave this blank to keep using the built-in rule-based templates — everything "
+            "still works without it. Add a free Google Gemini API key to have replies drafted "
+            "by AI instead. Your key is kept only in this browser session, same as your "
+            "email password — never written to disk."
+        )
+        gemini_key_input = st.text_input(
+            "Gemini API key", value=st.session_state.gemini_api_key, type="password",
+            placeholder="AIza... (get one free at aistudio.google.com/apikey)",
+        )
+        st.markdown(
+            "No credit card needed — sign in with your Google account at "
+            "[aistudio.google.com/apikey](https://aistudio.google.com/apikey) and click "
+            "\"Create API key\"."
+        )
+
     with st.expander("❓ Need a Gmail App Password?"):
         st.markdown("""
 Gmail blocks your normal password for this kind of access — you need a
@@ -84,6 +103,7 @@ Other providers: Outlook uses `outlook.office365.com` (IMAP) /
         st.session_state.imap_server = imap_input.strip()
         st.session_state.smtp_server = smtp_input.strip()
         st.session_state.smtp_port = int(smtp_port_input)
+        st.session_state.gemini_api_key = gemini_key_input.strip()
         st.session_state.connected = bool(
             st.session_state.email_address and st.session_state.email_password
         )
@@ -121,9 +141,20 @@ else:
                 )
                 added = 0
                 for e in new_emails:
-                    intent, draft = reply_suggester.suggest_reply(
-                        e["sender_name"], e["subject"], e["body"]
-                    )
+                    intent = reply_suggester.detect_intent(e["subject"], e["body"])
+                    draft = None
+                    if st.session_state.gemini_api_key:
+                        try:
+                            draft = ai_reply.generate_ai_reply(
+                                st.session_state.gemini_api_key,
+                                e["sender_name"], e["subject"], e["body"],
+                            )
+                        except ai_reply.AIReplyError:
+                            draft = None  # fall through to rule-based template below
+                    if draft is None:
+                        intent, draft = reply_suggester.suggest_reply(
+                            e["sender_name"], e["subject"], e["body"]
+                        )
                     before = len(db.get_emails(acct))
                     db.save_email(
                         acct, e["message_id"], e["sender_name"], e["sender_email"],
@@ -157,7 +188,7 @@ else:
                     value=e["suggested_reply"], height=180, key=f"reply_{e['id']}",
                 )
 
-                b1, b2, b3 = st.columns([1, 1, 3])
+                b1, b2, b3, b4 = st.columns([1, 1, 1.4, 2.6])
                 with b1:
                     if st.button("✉️ Send Reply", key=f"send_{e['id']}"):
                         try:
@@ -180,6 +211,20 @@ else:
                         db.update_reply_text(e["id"], reply_text)
                         db.mark_status(e["id"], "skipped")
                         st.rerun()
+                with b3:
+                    if st.session_state.gemini_api_key:
+                        if st.button("🤖 Regenerate with AI", key=f"regen_{e['id']}"):
+                            try:
+                                with st.spinner("Asking Gemini for a draft..."):
+                                    new_draft = ai_reply.generate_ai_reply(
+                                        st.session_state.gemini_api_key,
+                                        e["sender_name"], e["subject"], e["body"],
+                                    )
+                                db.update_reply_text(e["id"], new_draft)
+                                st.session_state.pop(f"reply_{e['id']}", None)
+                                st.rerun()
+                            except ai_reply.AIReplyError as exc:
+                                st.error(f"AI generation failed: {exc}")
 
 st.sidebar.caption("Built with Python, SQLite & Streamlit")
 st.sidebar.caption("🔒 Your password is kept only in this browser session — never saved to disk.")
