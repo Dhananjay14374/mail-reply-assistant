@@ -13,6 +13,10 @@ sending — this module only drafts, it never sends anything itself.
 """
 import requests
 
+# Google periodically retires older model names for new API keys — if this
+# starts 404ing again in the future ("model X is no longer available to new
+# users"), that's the only line that needs updating. Check current model
+# names at ai.google.dev/gemini-api/docs/models.
 GEMINI_MODEL = "gemini-3.5-flash"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
@@ -49,7 +53,16 @@ def generate_ai_reply(api_key: str, sender_name: str, subject: str, body: str) -
 
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.6, "maxOutputTokens": 300},
+        "generationConfig": {
+            "temperature": 0.6,
+            "maxOutputTokens": 800,
+            # gemini-3.5-flash always spends some tokens on hidden internal
+            # "thinking" before writing the actual reply — without this, that
+            # can eat the whole maxOutputTokens budget and leave a truncated,
+            # low-quality answer. "low" minimizes that overhead for a
+            # simple task like drafting an email reply.
+            "thinkingConfig": {"thinkingLevel": "low"},
+        },
     }
     headers = {"x-goog-api-key": api_key, "Content-Type": "application/json"}
 
@@ -63,9 +76,16 @@ def generate_ai_reply(api_key: str, sender_name: str, subject: str, body: str) -
 
     try:
         data = resp.json()
-        text = data["candidates"][0]["content"]["parts"][0]["text"]
+        candidate = data["candidates"][0]
+        text = candidate["content"]["parts"][0]["text"]
     except (KeyError, IndexError, ValueError) as exc:
         raise AIReplyError(f"Unexpected Gemini response shape: {exc}") from exc
+
+    # If generation got cut off before finishing (e.g. hit the token limit),
+    # the partial text is unreliable — better to fail loudly here and fall
+    # back to the rule-based template than show a half-finished reply.
+    if candidate.get("finishReason") == "MAX_TOKENS":
+        raise AIReplyError("Gemini response was cut off (hit the token limit).")
 
     text = text.strip()
     if not text:
