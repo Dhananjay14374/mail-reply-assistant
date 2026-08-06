@@ -58,10 +58,10 @@ with st.container(border=True):
 
     with st.expander("AI-generated replies (optional)"):
         st.caption(
-            "Leave this blank to keep using the built-in rule-based templates — everything "
-            "still works without it. Add a free Google Gemini API key to have replies drafted "
-            "by AI instead. Your key is kept only in this browser session, same as your "
-            "email password — never written to disk."
+
+            "Add a free Google Gemini API key to have replies drafted "
+            "Your key is kept only in this browser session "
+        
         )
         gemini_key_input = st.text_input(
             "Gemini API key", value=st.session_state.gemini_api_key, type="password",
