@@ -13,7 +13,7 @@ sending — this module only drafts, it never sends anything itself.
 """
 import requests
 
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODEL = "gemini-3.5-flash"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
 PROMPT_TEMPLATE = """You are drafting a short, professional email reply on behalf of the recipient.
