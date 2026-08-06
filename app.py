@@ -73,7 +73,7 @@ with st.container(border=True):
             "\"Create API key\"."
         )
 
-    with st.expander("❓ Need a Gmail App Password?"):
+    with st.expander(" Need a Gmail App Password?"):
         st.markdown("""
 Gmail blocks your normal password for this kind of access — you need a
 16-character **App Password** instead:
