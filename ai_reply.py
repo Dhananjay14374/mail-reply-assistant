@@ -1,22 +1,8 @@
 """
 ai_reply.py — Optional AI-generated reply drafts using the Google Gemini API
-(free tier: aistudio.google.com, no credit card required).
-
-This is entirely optional. If no API key is provided, the app falls back to
-the rule-based templates in reply_suggester.py. When a key IS provided,
-this module drafts a reply using Gemini instead of a fixed template — the
-intent label itself still comes from the keyword detector, since that's
-just used for filtering/display, not for the reply text.
-
-The generated draft is always shown to the user for review/editing before
-sending — this module only drafts, it never sends anything itself.
 """
 import requests
 
-# Google periodically retires older model names for new API keys — if this
-# starts 404ing again in the future ("model X is no longer available to new
-# users"), that's the only line that needs updating. Check current model
-# names at ai.google.dev/gemini-api/docs/models.
 GEMINI_MODEL = "gemini-3.5-flash"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
@@ -48,7 +34,7 @@ def generate_ai_reply(api_key: str, sender_name: str, subject: str, body: str) -
     prompt = PROMPT_TEMPLATE.format(
         sender_name=sender_name or "the sender",
         subject=subject or "(no subject)",
-        body=(body or "")[:3000],  # keep prompts reasonably sized
+        body=(body or "")[:3000],  
     )
 
     payload = {
@@ -56,11 +42,7 @@ def generate_ai_reply(api_key: str, sender_name: str, subject: str, body: str) -
         "generationConfig": {
             "temperature": 0.6,
             "maxOutputTokens": 800,
-            # gemini-3.5-flash always spends some tokens on hidden internal
-            # "thinking" before writing the actual reply — without this, that
-            # can eat the whole maxOutputTokens budget and leave a truncated,
-            # low-quality answer. "low" minimizes that overhead for a
-            # simple task like drafting an email reply.
+        
             "thinkingConfig": {"thinkingLevel": "low"},
         },
     }
@@ -81,9 +63,7 @@ def generate_ai_reply(api_key: str, sender_name: str, subject: str, body: str) -
     except (KeyError, IndexError, ValueError) as exc:
         raise AIReplyError(f"Unexpected Gemini response shape: {exc}") from exc
 
-    # If generation got cut off before finishing (e.g. hit the token limit),
-    # the partial text is unreliable — better to fail loudly here and fall
-    # back to the rule-based template than show a half-finished reply.
+  
     if candidate.get("finishReason") == "MAX_TOKENS":
         raise AIReplyError("Gemini response was cut off (hit the token limit).")
 
